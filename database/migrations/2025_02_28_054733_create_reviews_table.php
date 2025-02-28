@@ -14,10 +14,24 @@ return new class extends Migration
         Schema::create('reviews', function (Blueprint $table) {
             $table->id();
 
+//          Verbose syntax
+//            $table->unsignedBigInteger('book_id');
+
             $table->text('review');
             $table->unsignedTinyInteger('rating');
 
             $table->timestamps();
+
+//          Verbose syntax
+//            $table->foreign('book_id')
+//                ->references('id')
+//                ->on('books')
+//                ->onDelete('cascade');
+
+//          Shorthand syntax
+            $table->foreignId('book_id')
+                ->constrained()
+                ->cascadeOnDelete();
         });
     }
 
