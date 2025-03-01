@@ -21,4 +21,16 @@ class Book extends Model
     {
         return $query->where('title', 'like', '%' . $title . '%');
     }
+
+    public function scopePopular(Builder $query): Builder
+    {
+        return $query->withCount('reviews')
+            ->orderBy('reviews_count', 'desc');
+    }
+
+    public function scopeHighestRated(Builder $query): Builder
+    {
+        return $query->withAvg('reviews', 'rating')
+            ->orderBy('reviews_avg_rating', 'desc');
+    }
 }
