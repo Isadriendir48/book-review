@@ -4,11 +4,38 @@
 @section('content')
     <h1 class="mb-10 text-2x1">Books</h1>
 
-    <form method="GET" action="{{ route('books.index') }}"class="mb-4 flex items-center space-x-2">
+    <form method="GET" action="{{ route('books.index') }}" class="mb-4 flex items-center space-x-2">
         <input type="text" name="title" placeholder="Search by title..." value="{{ request('title') }}" class="input h-10"/>
+        <input type="hidden" name="filter" value="{{ request('filter') }}">
         <button type="submit" class="btn h-10">Search</button>
         <a href="{{ route('books.index') }}" class="btn h-10">Clear</a>
     </form>
+
+    <div class="filter-container mb-4 flex">
+        @php
+            $filters = [
+                '' => 'Latest',
+                'popular_last_month' => 'Last month popular',
+                'popular_last_six_months' => 'Last 6 months popular',
+                'highest_rated_last_month' => 'Highest rated month popular',
+                'highest_rated_last_six_months' => 'Highest rated 6 months popular'
+            ];
+         @endphp
+
+        @foreach($filters as $key => $label)
+            <a
+                href="{{ route('books.index', [...request()->query(), 'filter' => $key]) }}"
+                class="{{
+                    request('filter') === $key ||
+                    (is_null(request('filter')) && empty($key)) ?
+                        'filter-item-active' :
+                        'filter-item'
+                }}"
+            >
+                {{ $label }}
+            </a>
+        @endforeach
+    </div>
 
     <ul>
         @forelse($books as $book)
@@ -35,7 +62,7 @@
             <li class="mb-4">
                 <div class="empty-book-item">
                     <p class="empty-text">No books found</p>
-                    <a href="#" class="reset-link">Reset criteria</a>
+                    <a href="{{ route('books.index') }}" class="reset-link">Reset criteria</a>
                 </div>
             </li>
         @endforelse

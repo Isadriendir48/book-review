@@ -8,6 +8,31 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 
+/**
+ * 
+ *
+ * @property int $id
+ * @property string $title
+ * @property string $author
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Review> $reviews
+ * @property-read int|null $reviews_count
+ * @method static \Database\Factories\BookFactory factory($count = null, $state = [])
+ * @method static Builder<static>|Book highestRated(?string $from = null, ?string $to = null)
+ * @method static Builder<static>|Book minimumReviews(int $count)
+ * @method static Builder<static>|Book newModelQuery()
+ * @method static Builder<static>|Book newQuery()
+ * @method static Builder<static>|Book popular(?string $from = null, ?string $to = null)
+ * @method static Builder<static>|Book query()
+ * @method static Builder<static>|Book title(string $title)
+ * @method static Builder<static>|Book whereAuthor($value)
+ * @method static Builder<static>|Book whereCreatedAt($value)
+ * @method static Builder<static>|Book whereId($value)
+ * @method static Builder<static>|Book whereTitle($value)
+ * @method static Builder<static>|Book whereUpdatedAt($value)
+ * @mixin \Eloquent
+ */
 class Book extends Model
 {
     use HasFactory;
