@@ -20,10 +20,14 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property-read int|null $reviews_count
  * @method static \Database\Factories\BookFactory factory($count = null, $state = [])
  * @method static Builder<static>|Book highestRated(?string $from = null, ?string $to = null)
+ * @method static Builder<static>|Book highestRatedLastMonth()
+ * @method static Builder<static>|Book highestRatedLastSixMonths()
  * @method static Builder<static>|Book minimumReviews(int $count)
  * @method static Builder<static>|Book newModelQuery()
  * @method static Builder<static>|Book newQuery()
  * @method static Builder<static>|Book popular(?string $from = null, ?string $to = null)
+ * @method static Builder<static>|Book popularLastMonth()
+ * @method static Builder<static>|Book popularLastSixMonths()
  * @method static Builder<static>|Book query()
  * @method static Builder<static>|Book title(string $title)
  * @method static Builder<static>|Book whereAuthor($value)
@@ -66,6 +70,38 @@ class Book extends Model
     public function scopeMinimumReviews(Builder $query, int $count): Builder
     {
         return $query->having('reviews_count', '>=', $count);
+    }
+
+    public function scopePopularLastMonth(Builder $query): Builder
+    {
+        return $query
+            ->popular(now()->subMonth(), now())
+            ->highestRated(now()->subMonth(), now())
+            ->minimumReviews(2);
+    }
+
+    public function scopePopularLastSixMonths(Builder $query): Builder
+    {
+        return $query
+            ->popular(now()->subMonths(6), now())
+            ->highestRated(now()->subMonths(6), now())
+            ->minimumReviews(5);
+    }
+
+    public function scopeHighestRatedLastMonth(Builder $query): Builder
+    {
+        return $query
+            ->highestRated(now()->subMonth(), now())
+            ->popular(now()->subMonth(), now())
+            ->minimumReviews(2);
+    }
+
+    public function scopeHighestRatedLastSixMonths(Builder $query): Builder
+    {
+        return $query
+            ->highestRated(now()->subMonths(6), now())
+            ->popular(now()->subMonths(6), now())
+            ->minimumReviews(5);
     }
 
     private function dateRangeFilter(Builder $query, ?string $from = null, ?string $to = null): void
