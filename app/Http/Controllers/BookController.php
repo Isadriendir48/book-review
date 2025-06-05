@@ -28,7 +28,19 @@ class BookController extends Controller
             default => $query->latest()
         };
 
-        $books = $query->get();
+        //$books = $query->get();
+
+        // Cache can be implemented by using the following facade:
+        //$books = \Illuminate\Support\Facades\Cache::remember('books', 3600, fn () => $query->get());
+        // We can use the helper function as well:
+        //$books = cache()->remember('books', 3600, fn () => $query->get());
+
+        // We have to come up with a caching strategy that is unique for each request to prevent exposing
+        // unwanted data to users. For instance, this request receives a `title` parameter and a `filter`
+        // parameter. We can use the `title` and `filter` parameters to create a unique cache key to avoid
+        // returning the same data for different requests.
+        $cacheKey = "books:$filter:$title";
+        $books = cache()->remember($cacheKey, 3600, fn () => $query->get());
 
         return view('books.index', ['books' => $books]);
     }
