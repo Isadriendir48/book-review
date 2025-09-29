@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\Cache;
 
 /**
- * 
+ *
  *
  * @property int $id
  * @property string $review
@@ -55,5 +55,6 @@ class Review extends Model
         static::updated(fn (Review $review) => Cache::forget("book:$review->book_id"));
 
         static::deleted(fn (Review $review) => Cache::forget("book:$review->book_id"));
+        static::created(fn (Review $review) => Cache::forget("book:$review->book_id"));
     }
 }
