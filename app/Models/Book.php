@@ -2,21 +2,25 @@
 
 namespace App\Models;
 
+use Database\Factories\BookFactory;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Cache;
 
 
 /**
- * 
+ *
  *
  * @property int $id
  * @property string $title
  * @property string $author
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Review> $reviews
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ * @property-read Collection<int, \App\Models\Review> $reviews
  * @property-read int|null $reviews_count
  * @method static \Database\Factories\BookFactory factory($count = null, $state = [])
  * @method static Builder<static>|Book highestRated(?string $from = null, ?string $to = null)
@@ -35,6 +39,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @method static Builder<static>|Book whereId($value)
  * @method static Builder<static>|Book whereTitle($value)
  * @method static Builder<static>|Book whereUpdatedAt($value)
+ * @method static Builder<static>|Book withAverageRating(?string $from = null, ?string $to = null)
+ * @method static Builder<static>|Book withReviewsCount(?string $from = null, ?string $to = null)
  * @mixin \Eloquent
  */
 class Book extends Model
@@ -51,20 +57,28 @@ class Book extends Model
         return $query->where('title', 'like', '%' . $title . '%');
     }
 
-    public function scopePopular(Builder $query, ?string $from = null, ?string $to = null): Builder
+    public function scopeWithReviewsCount(Builder $query, ?string $from = null, ?string $to = null): Builder
     {
         return $query->withCount([
             'reviews' => fn (Builder $q) => $this->dateRangeFilter($q, $from, $to)
-        ])
-            ->orderBy('reviews_count', 'desc');
+        ]);
+    }
+
+    public function scopeWithAverageRating(Builder $query, ?string $from = null, ?string $to = null): Builder
+    {
+        return $query->withAvg([
+            'reviews' => fn (Builder $q) => $this->dateRangeFilter($q, $from, $to)
+        ], 'rating');
+    }
+
+    public function scopePopular(Builder $query, ?string $from = null, ?string $to = null): Builder
+    {
+        return $query->withReviewsCount(from: $from, to: $to)->orderBy('reviews_count', 'desc');
     }
 
     public function scopeHighestRated(Builder $query, ?string $from = null, ?string $to = null): Builder
     {
-        return $query->withAvg([
-            'reviews' => fn (Builder $q) => $this->dateRangeFilter($q, $from, $to)
-        ], 'rating')
-            ->orderBy('reviews_avg_rating', 'desc');
+        return $query->withAverageRating(from: $from, to: $to)->orderBy('reviews_avg_rating', 'desc');
     }
 
     public function scopeMinimumReviews(Builder $query, int $count): Builder
@@ -113,5 +127,11 @@ class Book extends Model
         } elseif (!empty($to)) {
             $query->where('created_at', '<=', $to);
         }
+    }
+
+    protected static function booted(): void
+    {
+        static::updated(fn (Book $book) => Cache::forget("book:$book->id"));
+        static::deleted(fn (Book $book) => Cache::forget("book:$book->id"));
     }
 }

@@ -49,10 +49,10 @@
                         </div>
                         <div>
                             <div class="book-rating">
-                                {{ number_format($book->reviews_avg_rating, 1) }}
+                                {{ number_format($book->reviews_avg_rating, 1) }} / 5.0
                             </div>
                             <div class="book-review-count">
-                                out of {{ $book->reviews_count ?: 'no' }} {{ Str::plural('review', $book->reviews_count) }}
+                                from {{ $book->reviews_count ?: 'no' }} {{ Str::plural('review', $book->reviews_count) }}
                             </div>
                         </div>
                     </div>
